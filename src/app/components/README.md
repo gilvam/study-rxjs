@@ -28,100 +28,25 @@ Essa ordem facilita o aprendizado começando pelo básico, avançando para padr�
 * **Subjects:** Atuam como Observables e Observers simultaneamente, permitindo multicast de valores.
 * **Schedulers:** Controlam quando e como a execução dos Observables ocorre (ex: `asyncScheduler`, `queueScheduler`).
 
-## 2. Criação de Observables
-* `of`, `from`
-* `fromEvent`
-* `interval`, `timer` 
-* `range`, `generate`
-* `defer`, `throwError`
-
-## 3. Manipulação de Fluxo (Pipe e Operadores Básicos)
-* `pipe`
-* `map`, `tap`
-* `filter`
-* `first`, `last`, `find`
-
-## 4. Operadores de Transformação
-* `mergeMap`
-* `switchMap`
-* `concatMap`
-* `exhaustMap`
-* `scan`
-* `buffer`, `bufferTime`, `bufferCount`
-
-## 5. Combinação de Observables
-* `combineLatest`
-* `forkJoin`
-* `merge`
-* `concat`
-* `zip`
-* `startWith`, `withLatestFrom`
-
-## 6. Controle de Tempo e Estado
-* `delay`, `delayWhen`
-* `throttleTime`, `throttle`
-* `debounceTime`, `debounce`
-* `auditTime`, `audit`
-* `timeout`, `timeoutWith`
-
-## 7. Tratamento de Erros
-* `catchError`
-* `retry`, `retryWhen`
-* `onErrorResumeNext`
-
-## 8. Operadores de Estado e Acumulação
-* `reduce`
-* `count`
-* `defaultIfEmpty`
-* `every`
-* `distinct`, `distinctUntilChanged`, `distinctUntilKeyChanged`
-
-## 9. Sujeitos (Subjects)
-* `Subject`
-* `BehaviorSubject`
-* `ReplaySubject`
-* `AsyncSubject`
-
-## 10. Multicast e Compartilhamento
-* `share`, `shareReplay`
-* `publish`, `publishReplay`, `publishBehavior`
-* `refCount`
-
-## 11. Operadores Avançados e Personalizados
-* `groupBy`
-* `window`, `windowTime`, `windowCount`
-* `partition`
-* Criação de operadores personalizados com `lift`
-
-## 12. Integração com Angular
-* Uso do async `pipe`
-* `HttpClient` e RxJS
-* `ActivatedRoute` com observables
-* Gerenciamento de estados reativos com `RxJS` e `Signals`
-* RxJS em formulários reativos (`FormControl.valueChanges`)
-
--------------------------------
-# V2 com mais tipos
-
 2. Criação de Observables
-of, from
-fromEvent, fromEventPattern
-interval, timer, animationFrames
-range, generate
-defer, throwError, iif, scheduled, using
-ajax, fromFetch, webSocket
+ of, from
+ fromEvent, fromEventPattern
+ interval, timer, animationFrames
+ range, generate
+ defer, throw / throwError, iif, scheduled, using
+ ajax, fromFetch, webSocket
 
 3. Manipulação de Fluxo (Pipe e Operadores Básicos)
-pipe
-map, tap
-filter, skip, skipLast, skipUntil, skipWhile, take, takeLast, takeUntil, takeWhile
-first, last, find, findIndex, single
-finalize, dematerialize, materialize, observeOn, subscribeOn
+ pipe
+ map, tap
+ filter, skip, skipLast, skipUntil, skipWhile, take, takeLast, takeUntil, takeWhile
+ first, last, find, findIndex, single
+ finalize, dematerialize, materialize, observeOn, subscribeOn
 
 4. Operadores de Transformação
 mergeMap, mergeAll, mergeScan
 switchMap, switchAll, switchScan
-concatMap, concatAll, concatWith
+concatMap, concatMapTo, concatAll, concatWith
 exhaustMap, exhaustAll
 scan, expand
 buffer, bufferTime, bufferCount, bufferToggle, bufferWhen
@@ -146,7 +71,7 @@ timeInterval, timestamp
 sample, sampleTime
 
 7. Tratamento de Erros
-catchError
+catch / catchError
 retry, retryWhen
 onErrorResumeNext, onErrorResumeNextWith
 throwIfEmpty
