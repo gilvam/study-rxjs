@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Inject, PLATFORM_ID, signal } from '@angular/core';
+import { AfterViewInit, Component, Inject, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ColorUtil } from './_shared/utils/color.util';
@@ -18,13 +18,15 @@ class Event {
     public type: TypeEvent,
     public subEvents: Event[] = [],
     public flexGrow: number = 0
-  ) {}
+  ) {
+  }
 }
 
 class Color {
   private index = 0;
 
-  constructor(public colors: string[]) {}
+  constructor(public colors: string[]) {
+  }
 
   get backGround(): string {
     return this.colors[this.index++ % this.colors.length];
@@ -32,8 +34,8 @@ class Color {
 
   backGroundRadialDarken(color: string): string {
     const darken = ColorUtil.hexadecimalToHslDarken(color, 14);
-    const lighten = `rgb(from ${color} r g b / 1)`;
-    return `radial-gradient(circle, ${lighten} 0%, ${darken} 100%)`;
+    const lighten = `rgb(from ${ color } r g b / 1)`;
+    return `radial-gradient(circle, ${ lighten } 0%, ${ darken } 100%)`;
   }
 }
 
@@ -44,7 +46,7 @@ class Color {
   template: `
     <div class="container">
       <h2>Marble Testing Visualizer</h2>
-      <input type="text" [(ngModel)]="marbleInput" (input)="drawDiagram()" placeholder="Enter Marble Diagram">
+      <input type="text" [(ngModel)]="marbleInput" (input)="drawDiagram(marbleInput)" placeholder="Enter Marble Diagram">
       <div class="diagram-container">
         <div class="events-container">
           <div class="timeline"></div>
@@ -79,18 +81,20 @@ class Color {
       display: flex;
       flex-direction: column;
     }
+
     input {
       padding: 8px;
       margin-bottom: 10px;
       font-size: 16px;
     }
+
     .diagram-container {
       position: relative;
       width: 100%;
-      height: 200px;
       border: 1px solid #ccc;
       background-color: #f9f9f9;
     }
+
     .timeline {
       position: absolute;
       top: 50px;
@@ -99,10 +103,13 @@ class Color {
       height: 2px;
       background-color: #000;
     }
+
     .events-container {
       display: flex;
       padding: 30px 10px;
+      //justify-content: space-evenly;
     }
+
     .event {
       display: flex;
       position: sticky;
@@ -116,27 +123,29 @@ class Color {
       font-weight: bold;
       border: 2px solid #000;
     }
+
     .space {
       border: none;
       display: flex;
       height: 10px;
     }
+
     .complete {
       color: black;
       font-size: 48px;
       font-weight: 100;
-      margin-top: -12px;
+      margin-top: -11px;
     }
+
     .error {
       color: red;
       font-size: 40px;
       font-weight: 100;
-      margin-top: -1px;
     }
+
     .group {
-      //display: flex;
-      > .event {
-        &:not(first-child) {
+      .event {
+        &:not(:first-child) {
           margin-top: -5px;
         }
       }
@@ -144,64 +153,123 @@ class Color {
   `],
 })
 export class AppComponent implements AfterViewInit {
-  marbleInput = signal('a---b-----c--d--e--f-g-h-i--(abc)|');
+  // marbleInput = signal('a------b');
+  // marbleInput = signal('(a 10ms b)');
+  // marbleInput = signal('a---b-----c--d--e--f-g-h-i-j-(k-l)-m-(abc)|');
+  // marbleInput = signal('a---b-----c--d--e--f-g-h(a 20ms b)-i-j-(k-l)-m-(abc)|');
+  marbleInput = signal('ab');
   events = signal<Event[]>([]);
-  color = new Color(['#3ea1cb', '#00ffb0', '#ffcb46', '#ff7f00', '#6CB0A8', '#97D49B', '#CCB8D7', '#C1C2AD', '#FFD898', '#68BBE3', '#189AB4']);
+  color = new Color([
+    '#3ea1cb',
+    '#ffcb46',
+    '#77dd77',
+    '#ff9c9c',
+    '#6CB0A8',
+    '#d3bcf6',
+    '#ff7f00',
+    '#ffb1ee',
+    '#d3dd33',
+    '#ff6961',
+    '#C1C2AD',
+    '#FFD898',
+    '#f9f7f7',
+    '#b5dccd',
+    '#b1becd',
+    '#c6b9c0',
+    '#a9b8b2',
+    '#64a49e'
+  ]);
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+  }
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId)) {
-      this.drawDiagram();
+      this.drawDiagram(this.marbleInput);
     }
   }
 
-  private filterDiagramList (diagramList: string[], ...chars: string[]): string[] {
+  private filterDiagramList(diagramList: string[], ...chars: string[]): string[] {
     const indices = chars.map(char => diagramList.indexOf(char)).filter(index => index !== -1);
     const minIndex = Math.min(...indices);
     return minIndex !== -1 ? diagramList.slice(0, minIndex + 1) : diagramList;
   };
 
-  drawDiagram() {
-    const diagramList = this.marbleInput().split('');
-    const filteredList = this.filterDiagramList(diagramList, '#', '|');
+  drawDiagram(diagramList: WritableSignal<string>): void {
+    const filteredList = this.filterDiagramList(diagramList().split(''), '#', '|');
     const diagram = filteredList.join('');
-    const marbleDiagramRegex = /(\d+ms)|(\(.*?\))|([a-z0-9])|(-)|(\|)|(#)/gi;
-    const tokens = Array.from(diagram.matchAll(marbleDiagramRegex));
-    const y = 41;
-
-    let dashCount = 0;
-
-    const events: Event[] = tokens.reduce((acc, match: any, i: number) => {
-      const [token] = match;
-      if (token === '-') {
-        dashCount++;
-        if(dashCount > 0){
-          acc.push(new Event('', '', TypeEvent.SPACE, [], 0.1));
-        }
-      } else if (token.match(/\d+ms/)) {
-        acc.push(new Event('', '', TypeEvent.SPACE, [], 0.1));
-      } else if (token.startsWith('(') && token.endsWith(')')) {
-        const values = token.slice(1, -1).split('');
-        const subEvents: Event[] = values.map((char: string) =>
-          new Event(char, this.color.backGround, TypeEvent.EVENT)
-        );
-        acc.push(new Event('', '', TypeEvent.GROUP, subEvents, 0.1));
-        dashCount = 0;
-      } else if (token.match(/[a-z0-9]/i)) {
-        acc.push(new Event(token, this.color.backGround, TypeEvent.EVENT, []));
-        dashCount = 0;
-      } else if (token === '|') {
-        acc.push(new Event('|', '', TypeEvent.COMPLETE, [], 0.1));
-        dashCount = 0;
-      } else if (token === '#') {
-        acc.push(new Event('X', '', TypeEvent.ERROR, [], 0.1));
-        dashCount = 0;
-      }
-
-      return acc;
-    }, [] as Event[]);
-
+    const tokens = this.tokenizeDiagram(diagram);
+    const events = this.createEventsFromTokens(tokens);
     this.events.set(events);
+  }
+
+  private tokenizeDiagram(diagram: string): RegExpExecArray[] {
+    const marbleDiagramRegex = /(\d+ms)|(\(.*?\))|([a-z0-9])|(-)|(\|)|(#)/gi;
+    return Array.from(diagram.matchAll(marbleDiagramRegex));
+  }
+
+  private regExpExec(token: string): RegExpExecArray {
+    return Object.assign([''], { 0: token, index: 0, input: token, groups: undefined });
+  }
+
+  private createEventsFromTokens(tokens: RegExpExecArray[], acc: Event[] = []): Event[] {
+    return tokens.reduce<Event[]>((acc: Event[], match: RegExpExecArray) => {
+      let [token] = match;
+      switch (true) {
+        case token === '-':
+          acc.push(...this.getSpaceEvent());
+          break;
+        case token.startsWith('(') && token.endsWith(')') && token.includes('-'):
+          const tokenList = token.slice(1, -1).split('');
+          const tokenReg = tokenList.map(it => this.regExpExec(it));
+          return this.createEventsFromTokens(tokenReg, acc);
+        case token.startsWith('(') && token.endsWith(')') && /\d+ms/.test(token):
+          const tokenList2 = token.slice(1, -1).split(' ');
+          const [char, ms, nextChar] = tokenList2;
+          const tokenReg2 = [this.regExpExec(char), this.regExpExec(`${ms}`), this.regExpExec(nextChar)];
+          return this.createEventsFromTokens(tokenReg2, acc);
+        case token.startsWith('(') && token.endsWith(')'):
+          acc.push(this.getGroupEvent(token));
+          break;
+        case /\d+ms/.test(token):
+          const msValue = Number(token.replace('ms', '')) || 1;
+          acc.push(...this.getSpaceEvent(msValue));
+          break;
+        case /[a-z0-9]/i.test(token):
+          acc.push(this.getEvent(token));
+          break;
+        case token === '|':
+          acc.push(this.getCompleteEvent());
+          break;
+        case token === '#':
+          acc.push(this.getErrorEvent());
+          break;
+      }
+      return acc;
+    }, acc);
+  }
+
+  private getSpaceEvent(count = 1): Event[] {
+    return Array(count).fill(new Event('', '', TypeEvent.SPACE, [], 1));
+  }
+
+  private getGroupEvent(token: string): Event {
+    const values = token.slice(1, -1).split('');
+    const subEvents: Event[] = values.map((char: string) =>
+      new Event(char, this.color.backGround, TypeEvent.EVENT)
+    );
+    return new Event('', '', TypeEvent.GROUP, subEvents, 1);
+  }
+
+  private getEvent(token: string): Event {
+    return new Event(token, this.color.backGround, TypeEvent.EVENT, []);
+  }
+
+  private getCompleteEvent(): Event {
+    return new Event('|', '', TypeEvent.COMPLETE, []);
+  }
+
+  private getErrorEvent(): Event {
+    return new Event('X', '', TypeEvent.ERROR, []);
   }
 }
