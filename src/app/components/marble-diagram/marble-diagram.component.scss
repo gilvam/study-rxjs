@@ -1,0 +1,124 @@
+$border: 3px solid #000;
+
+:host{
+  .container {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+
+  input {
+    padding: 8px;
+    margin-bottom: 10px;
+    font-size: 16px;
+  }
+
+  .diagram-container {
+    position: relative;
+    width: 100%;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+  }
+
+  .timeline {
+    position: absolute;
+    top: 50px;
+    left: 20px;
+    right: 20px;
+    border-top: $border;
+
+    &::after{
+      content: "";
+      position: absolute;
+      right: -3px;
+      width: 0;
+      height: 0;
+      border-top: 4px solid transparent;
+      border-bottom: 4px solid transparent;
+      border-left: 7px solid #000;
+      bottom: -3px;
+    }
+  }
+
+  .events-container {
+    display: flex;
+    padding: 30px 10px;
+  }
+
+  .event {
+    display: flex;
+    position: sticky;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #aaaaaa;
+    font-weight: bold;
+    border: $border;
+  }
+
+  .space {
+    border: none;
+    display: flex;
+    height: 10px;
+  }
+
+  .complete {
+    font-weight: 100;
+    display: flex;
+    position: sticky;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    width: 14px;
+    height: 14px;
+    border: $border;
+    border-color: transparent;
+
+    //background: rgba(180, 180, 255, 0.5);
+    //margin-left: -58px;
+
+    &::before {
+      content: "";
+      position: absolute;
+      border-left: $border;
+      height: 47px;
+    }
+  }
+
+  .complete-event {
+    &::before {
+      content: "";
+      position: absolute;
+      border-left: $border;
+      height: 7px;
+      bottom: 34px;
+    }
+    &::after {
+      content: "";
+      position: absolute;
+      border-left: $border;
+      height: 7px;
+      top: 34px;
+    }
+  }
+
+  .error {
+    color: red;
+    font-size: 40px;
+    font-weight: 100;
+    margin-top: -1px;
+    z-index: 0;
+  }
+
+  .group {
+    .event {
+      &:not(:first-child) {
+        margin-top: -5px;
+      }
+    }
+  }
+}
+

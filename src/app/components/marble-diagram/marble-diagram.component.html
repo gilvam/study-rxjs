@@ -1,0 +1,32 @@
+<div class="container">
+  <h2>Marble Testing Visualizer</h2>
+  <input type="text" [(ngModel)]="marbleInput" (input)="drawDiagram(marbleInput)"
+         placeholder="Enter Marble Diagram">
+  <div class="diagram-container">
+    <div class="events-container">
+      <div class="timeline"></div>
+      <div *ngFor="let event of events()"
+           [style.background]="color.backGroundRadialDarken(event.color)"
+           [style.flexGrow]="event.flexGrow"
+           [class.space]="event.type === 'space'"
+           [class.group]="event.type === 'group'"
+           [class.event]="event.type === 'event' || event.type === 'event-and-complete'"
+           [class.complete]="event.type === 'complete'"
+           [class.complete-event]="event.type === 'event-and-complete'"
+           [class.error]="event.type === 'error'"
+      >
+        <ng-container *ngIf="event.type === 'group'">
+          <div *ngFor="let subEvent of event.subEvents"
+               class="event"
+               [style.background]="color.backGroundRadialDarken(subEvent.color)"
+          >
+            {{ subEvent.label }}
+          </div>
+        </ng-container>
+        <ng-container *ngIf="event.type !== 'group' && event.type !== 'space'">
+          {{ event.label }}
+        </ng-container>
+      </div>
+    </div>
+  </div>
+</div>
