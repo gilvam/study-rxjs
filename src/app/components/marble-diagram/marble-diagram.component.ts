@@ -1,9 +1,9 @@
 import { AfterViewInit, Component, Inject, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { isPlatformBrowser, NgForOf, NgIf } from '@angular/common';
-import { Color } from './models/color.model';
 import { MarbleEvent } from './models/marble-event.model';
 import { TypeEvent } from './models/type-event.enum';
+import { ColorService } from './services/color.service';
 
 @Component({
 	selector: 'app-marble-diagram',
@@ -12,7 +12,6 @@ import { TypeEvent } from './models/type-event.enum';
 	styleUrl: './marble-diagram.component.scss'
 })
 export class MarbleDiagramComponent implements AfterViewInit {
-	color = new Color();
 	events = signal<MarbleEvent[]>([]);
 	marbleInput = signal(
 		// 'a------b'
@@ -23,9 +22,12 @@ export class MarbleDiagramComponent implements AfterViewInit {
 		'ab-c-(cd)-e-f-|'
 	);
 
-	constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+	constructor(
+		@Inject(PLATFORM_ID) private platformId: object,
+		public colorService: ColorService
+	) {}
 
-	ngAfterViewInit() {
+	ngAfterViewInit(): void {
 		if (isPlatformBrowser(this.platformId)) {
 			this.drawDiagram(this.marbleInput);
 		}
@@ -53,9 +55,9 @@ export class MarbleDiagramComponent implements AfterViewInit {
 		return Array.from(diagram.matchAll(marbleDiagramRegex));
 	}
 
-	private createEventsFromTokens(tokens: RegExpExecArray[], acc: MarbleEvent[] = []): MarbleEvent[] {
+	private createEventsFromTokens(tokens: RegExpExecArray[], accEvents: MarbleEvent[] = []): MarbleEvent[] {
 		return tokens.reduce<MarbleEvent[]>((acc: MarbleEvent[], match: RegExpExecArray) => {
-			let [token] = match;
+			const [token] = match;
 			switch (true) {
 				case token === '-':
 					return this.handleSpaceEvent(acc);
@@ -76,7 +78,7 @@ export class MarbleDiagramComponent implements AfterViewInit {
 				default:
 					return acc;
 			}
-		}, acc);
+		}, accEvents);
 	}
 
 	private handleSpaceEvent(acc: MarbleEvent[]): MarbleEvent[] {
@@ -140,12 +142,7 @@ export class MarbleDiagramComponent implements AfterViewInit {
 	}
 
 	private generateRegExp(token: string): RegExpExecArray {
-		return Object.assign([''], {
-			0: token,
-			index: 0,
-			input: token,
-			groups: undefined
-		});
+		return Object.assign([''], { 0: token, index: 0, input: token, groups: undefined });
 	}
 
 	private getSpaceEvent(count = 1): MarbleEvent[] {
@@ -173,16 +170,16 @@ export class MarbleDiagramComponent implements AfterViewInit {
 
 		const subEvents: MarbleEvent[] = values
 			.filter((it) => !['|', '#'].includes(it))
-			.map((char: string) => new MarbleEvent(char, this.color.backGround, TypeEvent.EVENT));
+			.map((char: string) => new MarbleEvent(char, this.colorService.backGround, TypeEvent.EVENT));
 		return [new MarbleEvent('', '', TypeEvent.GROUP, 0, subEvents), ...events];
 	}
 
 	private getEvent(token: string): MarbleEvent {
-		return new MarbleEvent(token, this.color.backGround, TypeEvent.EVENT);
+		return new MarbleEvent(token, this.colorService.backGround, TypeEvent.EVENT);
 	}
 
 	private getEventAndComplete(token: string): MarbleEvent {
-		return new MarbleEvent(token, this.color.backGround, TypeEvent.EVENT_AND_COMPLETE);
+		return new MarbleEvent(token, this.colorService.backGround, TypeEvent.EVENT_AND_COMPLETE);
 	}
 
 	private getCompleteEvent(): MarbleEvent {
