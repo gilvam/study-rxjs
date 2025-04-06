@@ -1,8 +1,5 @@
 export class ColorUtil {
-	private static hexadecimalToHsl(
-		hexadecimal: string,
-		lightnessPercentage = 0,
-	): string {
+	private static hexadecimalToHsl(hexadecimal: string, lightnessPercentage = 0): string {
 		const hex = hexadecimal.replace(/^#/, '');
 		const r = parseInt(hex.substring(0, 2), 16) / 255;
 		const g = parseInt(hex.substring(2, 4), 16) / 255;
@@ -13,8 +10,7 @@ export class ColorUtil {
 		const diff = max - min;
 
 		const lightness = (max + min) / 2;
-		const saturation =
-			lightness === 0 ? 0 : diff / (1 - Math.abs(2 * lightness - 1));
+		const saturation = lightness === 0 ? 0 : diff / (1 - Math.abs(2 * lightness - 1)) || 0;
 
 		let hue;
 		if (diff === 0) {

@@ -5,7 +5,7 @@ import { MarbleEvent } from './models/marble-event.model';
 import { MarbleEventTypeEnum } from './models/marble-event-type.enum';
 import { ColorService } from './services/color.service';
 import { MarbleDiagramTypeEnum } from './models/marble-diagram-type.enum';
-import { TimerUtil } from '../../_shared/utils/timer.util';
+import { TimerUtil } from '../../_shared/utils/timer/timer.util';
 
 @Component({
 	selector: 'app-marble-diagram',
@@ -15,25 +15,7 @@ import { TimerUtil } from '../../_shared/utils/timer.util';
 })
 export class MarbleDiagramComponent implements AfterViewInit {
 	events = signal<MarbleEvent[]>([]);
-	marbleInput = signal(
-		// 'a------b'
-		// '(a 10ms b)'
-		// 'ab'
-		// 'a---b-----c--d--e--f-g-h-i-j-(k-l)-m-(abc)|'
-		// 'ab-c--d(e 10ms f)(g-h)(ij)-k|'
-		// 'ab-c-(cd)-e-f-|'
-		// 'ab-(cd)-(e-f)-(g 10ms h-|)'
-		// '-- 9ms a 9ms b 9ms (c|)'
-		// '10ms (a-b|)'
-		// '10ms (0-1|)'
-		// '10ms (0-1#)'
-
-		// '(g 10ms h)'
-		// 'ab-(cd)-(e-f)-(g 10ms h)(i 1s j)(k 5m l)-|'
-		'(ab)(c-d)(k 10ms l|)'
-	);
-
-	// TODO: o tempo de (ms, s, m) não tem diferença nos espaçamento
+	marbleInput = signal('(ab)(c-d)(k 10ms l|)');
 
 	constructor(
 		@Inject(PLATFORM_ID) private platformId: object,
@@ -50,7 +32,7 @@ export class MarbleDiagramComponent implements AfterViewInit {
 		const tokenNormalizedUnits = TimerUtil.normalizeTimeUnits(diagramList());
 		const tokens = this.tokenizeDiagram(tokenNormalizedUnits);
 		const events = this.createEventsFromTokens(tokens);
-		events.push(...this.getSpaceFakeEvent(1));
+		events.push(...this.getSpaceFakeEvent());
 		this.events.set(events);
 	}
 
