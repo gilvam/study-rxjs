@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build",
+    "build": "ng build --prod --base-href /study-rxjs/",
     "watch": "ng build --watch --configuration development",
     "test": "jest --no-cache --coverage",
     "test:watch": "jest --no-cache --coverage --watch",
