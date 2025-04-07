@@ -1,6 +1,6 @@
 
 export default {
-  basePath: '/study-rxjs',
+  basePath: '/',
   supportedLocales: {
   "en-US": ""
 },
