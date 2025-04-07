@@ -17,6 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "baseHref": "/study-rxjs/",
             "outputPath": "dist/study-rxjs",
             "index": "src/index.html",
             "browser": "src/main.ts",
@@ -54,9 +55,7 @@
                   "maximumWarning": "4kB",
                   "maximumError": "8kB"
                 }
-              ],
-              "outputHashing": "all",
-              "sourceMap": true
+              ]
             },
             "development": {
               "optimization": false,
