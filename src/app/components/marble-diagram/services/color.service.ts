@@ -26,6 +26,10 @@ export class ColorService {
 		'#aaaaaa'
 	];
 
+	resetIndex(): void {
+		this.index = 0;
+	}
+
 	setColors(colors: string[]): void {
 		this.colors = colors;
 	}

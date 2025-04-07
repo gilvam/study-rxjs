@@ -15,7 +15,7 @@ import { TimerUtil } from '../../_shared/utils/timer/timer.util';
 })
 export class MarbleDiagramComponent implements AfterViewInit {
 	events = signal<MarbleEvent[]>([]);
-	marbleInput = signal('(ab)(c-d)(k 10ms l|)');
+	marbleInput = signal('(ab)c-(d 1s e)(f 5s g|)');
 
 	constructor(
 		@Inject(PLATFORM_ID) private platformId: object,
@@ -29,6 +29,7 @@ export class MarbleDiagramComponent implements AfterViewInit {
 	}
 
 	drawDiagram(diagramList: WritableSignal<string>): void {
+		this.colorService.resetIndex();
 		const tokenNormalizedUnits = TimerUtil.normalizeTimeUnits(diagramList());
 		const tokens = this.tokenizeDiagram(tokenNormalizedUnits);
 		const events = this.createEventsFromTokens(tokens);
@@ -55,41 +56,31 @@ export class MarbleDiagramComponent implements AfterViewInit {
 	}
 
 	private createEventsFromTokens(tokens: RegExpExecArray[], accEvents: MarbleEvent[] = []): MarbleEvent[] {
-		return tokens.reduce<MarbleEvent[]>((acc: MarbleEvent[], match: RegExpExecArray) => {
-			const [token] = match;
+		const handler = (acc: MarbleEvent[], token = '') => {
 			const hasEvent = new RegExp(MarbleDiagramTypeEnum.EVENT, 'i').test(token);
 			const hasGroup = /^\(.*\)$/.test(token);
 			const hasFrame = token.includes(MarbleDiagramTypeEnum.FRAME);
 			const hasTime = /\d+(ms|s|m)/.test(token);
-			const hasGroupAndFrame = hasGroup && hasFrame;
-			const hasGroupAndTime = hasGroup && hasTime;
 
-			switch (token) {
-				case MarbleDiagramTypeEnum.FRAME:
-					return this.handleSpaceEvent(acc);
-				case MarbleDiagramTypeEnum.COMPLETE:
-					return this.handleCompleteEvent(acc);
-				case MarbleDiagramTypeEnum.ERROR:
-					return this.handleErrorEvent(acc);
-				default:
-					if (hasGroupAndTime) {
-						return this.handleTimedGroupEvent(token, acc);
-					}
-					if (hasGroupAndFrame) {
-						return this.handleComplexGroupEvent(token, acc);
-					}
-					if (hasGroup) {
-						return this.handleGroupEvent(token, acc);
-					}
-					if (hasTime) {
-						return this.handleTimedSpaceEvent(token, acc);
-					}
-					if (hasEvent) {
-						return this.handleCharacterEvent(token, tokens, acc);
-					}
-					return acc;
-			}
-		}, accEvents);
+			const handlers = [
+				{ condition: token === MarbleDiagramTypeEnum.FRAME, handler: () => this.handleSpaceEvent(acc) },
+				{ condition: token === MarbleDiagramTypeEnum.COMPLETE, handler: () => this.handleCompleteEvent(acc) },
+				{ condition: token === MarbleDiagramTypeEnum.ERROR, handler: () => this.handleErrorEvent(acc) },
+				{ condition: hasGroup && hasTime, handler: () => this.handleTimedGroupEvent(token, acc) },
+				{ condition: hasGroup && hasFrame, handler: () => this.handleComplexGroupEvent(token, acc) },
+				{ condition: hasGroup, handler: () => this.handleGroupEvent(token, acc) },
+				{ condition: hasTime, handler: () => this.handleTimedSpaceEvent(token, acc) },
+				{ condition: hasEvent, handler: () => this.handleCharacterEvent(token, acc, tokens) }
+			];
+
+			return handlers.find((handle) => handle.condition)?.handler() || acc;
+		};
+
+		for (const token of tokens) {
+			accEvents = handler(accEvents, token.at(0));
+		}
+
+		return accEvents;
 	}
 
 	private handleSpaceEvent(acc: MarbleEvent[]): MarbleEvent[] {
@@ -123,12 +114,12 @@ export class MarbleDiagramComponent implements AfterViewInit {
 	}
 
 	private handleTimedSpaceEvent(token: string, acc: MarbleEvent[]): MarbleEvent[] {
-		const msValue = Number(token.replace('ms', '')) || 1;
+		const msValue = Number(token.replace(/ms|s|m/, '')) || 1;
 		acc.push(...this.getSpaceEvent(msValue));
 		return acc;
 	}
 
-	private handleCharacterEvent(token: string, tokens: RegExpExecArray[], acc: MarbleEvent[]): MarbleEvent[] {
+	private handleCharacterEvent(token: string, acc: MarbleEvent[], tokens: RegExpExecArray[]): MarbleEvent[] {
 		if (acc.length && acc.at(acc.length - 1)?.type === MarbleEventTypeEnum.EVENT) {
 			acc.push(...this.getSpaceFakeHalfEvent());
 		}
