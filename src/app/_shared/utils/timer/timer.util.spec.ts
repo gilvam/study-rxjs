@@ -5,13 +5,13 @@ import { TimeEnum } from './models/time.enum';
 describe('TimerUtil', () => {
 	it('should normalize mixed time units to the smallest unit with the least digits', () => {
 		const input = '(a 100ms b)-c-(d 30s e)-f-(g 1m h)';
-		const expected = '(a 1ms b)-c-(d 300ms e)-f-(g 600ms h)';
+		const expected = '(a 100ms b)-c-(d 30000ms e)-f-(g 60000ms h)';
 		expect(TimerUtil.normalizeTimeUnits(input)).toBe(expected);
 	});
 
 	it('should handle input with only milliseconds', () => {
 		const input = '(a 100ms b)-c-(d 200ms e)-f-(g 300ms h)';
-		const expected = '(a 1ms b)-c-(d 2ms e)-f-(g 3ms h)';
+		const expected = '(a 100ms b)-c-(d 200ms e)-f-(g 300ms h)';
 		expect(TimerUtil.normalizeTimeUnits(input)).toBe(expected);
 	});
 

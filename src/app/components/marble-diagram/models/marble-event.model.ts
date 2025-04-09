@@ -5,7 +5,6 @@ export class MarbleEvent {
 		public label: string,
 		public color: string,
 		public type: MarbleEventTypeEnum,
-		public flexGrow = 0,
 		public subEvents: MarbleEvent[] = []
 	) {}
 }

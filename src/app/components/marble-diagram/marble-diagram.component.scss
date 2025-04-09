@@ -1,11 +1,13 @@
-$border: 3px solid #000;
+$color-gray: #404040;
+$color-gray-light: lighten($color-gray, 30%);
+$border: 2px solid $color-gray;
+$container-height: 60px;
+$container-height-arrow: calc($container-height - 20px);
 
 :host {
-	.container {
-		font-family: Arial, sans-serif;
-		display: flex;
-		flex-direction: column;
-	}
+	font-family: Arial, sans-serif;
+	display: flex;
+	flex-direction: column;
 
 	input {
 		padding: 8px;
@@ -13,109 +15,189 @@ $border: 3px solid #000;
 		font-size: 16px;
 	}
 
-	.diagram-container {
+	.container {
+		display: flex;
 		position: relative;
 		width: 100%;
-		border: 1px solid #ccc;
-		background-color: #f9f9f9;
-	}
+		padding-top: $container-height;
 
-	.timeline {
-		position: absolute;
-		top: 50px;
-		left: 20px;
-		right: 20px;
-		border-top: $border;
+		.item {
+			display: flex;
+			justify-content: center;
+			position: relative;
+			width: 100%;
+			z-index: 2;
 
-		&::after {
-			content: "";
-			position: absolute;
-			right: -3px;
-			width: 0;
-			height: 0;
-			border-top: 4px solid transparent;
-			border-bottom: 4px solid transparent;
-			border-left: 7px solid #000;
-			bottom: -3px;
+			@extend %timeLine;
+			@extend %timeLineNumbers;
+			@extend %itemInitAndFinalize;
+			@extend %arrow;
+
+			&--event {
+				display: flex;
+				position: static;
+				justify-content: center;
+				align-items: center;
+				padding: 10px;
+				width: 14px;
+				height: 14px;
+				border-radius: 50%;
+				background-color: #aaaaaa;
+				border: $border;
+			}
+
+			&--space {
+				display: flex;
+				height: 10px;
+				justify-content: center;
+			}
+
+			&--complete {
+			}
+
+			&--complete-event {
+			}
+
+			&--error {
+				display: flex;
+				justify-content: center;
+				color: red;
+				font-size: 40px;
+				font-weight: 100;
+				margin-top: -3px;
+			}
+
+			&--group {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+
+				.item--event {
+					&:not(:first-child) {
+						margin-top: -5px;
+					}
+				}
+			}
 		}
 	}
 
-	.events-container {
-		display: flex;
-		padding: 30px 10px;
-	}
-
-	.event {
-		display: flex;
-		position: sticky;
-		justify-content: center;
-		align-items: center;
-		padding: 10px;
-		width: 14px;
-		height: 14px;
-		border-radius: 50%;
-		background-color: #aaaaaa;
-		font-weight: bold;
-		border: $border;
-	}
-
-	.space {
-		border: none;
-		display: flex;
-		height: 10px;
-	}
-
-	.complete {
-		font-weight: 100;
-		display: flex;
-		position: sticky;
-		justify-content: center;
-		align-items: center;
-		padding: 10px;
-		width: 14px;
-		height: 14px;
-		border: $border;
-		border-color: transparent;
-		//background: rgba(180, 180, 255, 0.5);
-		//margin-left: -58px;
+	%timeLine {
+		&::before,
+		&::after {
+			content: '';
+			position: absolute;
+			top: calc(-#{$container-height-arrow} + 10px);
+			border-top: 1px solid $color-gray-light;
+			height: 5px;
+		}
 
 		&::before {
-			content: "";
-			position: absolute;
-			border-left: $border;
-			height: 47px;
+			left: 0;
+			right: 50%;
 		}
-	}
 
-	.complete-event {
-		&::before {
-			content: "";
-			position: absolute;
-			border-left: $border;
-			height: 7px;
-			bottom: 34px;
-		}
 		&::after {
-			content: "";
-			position: absolute;
-			border-left: $border;
-			height: 7px;
-			top: 34px;
+			left: 50%;
+			right: 0;
+			border-left: 1px solid $color-gray-light;
+		}
+
+		&:first-child {
+			&::before {
+				border-color: transparent;
+			}
+		}
+		&:last-child {
+			&::after {
+				border-top: none;
+			}
 		}
 	}
 
-	.error {
-		color: red;
-		font-size: 40px;
-		font-weight: 100;
-		margin-top: -1px;
-		z-index: 0;
+	%itemInitAndFinalize {
+		&:first-child {
+			> * {
+				&::before {
+					content: '';
+					position: absolute;
+					border-left: $border;
+					height: 26px;
+					top: -6px;
+					z-index: -1;
+				}
+			}
+		}
+		&:last-child {
+			> .item--complete-event,
+			> .item--complete {
+				&::before {
+					content: '';
+					position: absolute;
+					border-left: $border;
+					height: 48px;
+					top: -6px;
+					z-index: -1;
+				}
+			}
+		}
 	}
 
-	.group {
-		.event {
-			&:not(:first-child) {
-				margin-top: -5px;
+	%timeLineNumbers {
+		> * {
+			&::after {
+				content: attr(time-type);
+				position: absolute;
+				font-size: 10px;
+				font-weight: 100;
+				color: $color-gray-light;
+				top: calc(-#{$container-height-arrow} + 17px);
+			}
+		}
+	}
+
+	%arrow {
+		> * {
+			span {
+				display: flex;
+				justify-content: center;
+
+				&::before,
+				&::after {
+					content: '';
+					position: absolute;
+					top: 18px;
+					border-top: 2px solid $color-gray;
+					height: 5px;
+					z-index: -1;
+				}
+
+				&::before {
+					left: 0;
+					right: 50%;
+				}
+
+				&::after {
+					left: 50%;
+					right: 0;
+				}
+			}
+		}
+		&:last-child {
+			> * {
+				span {
+					&::after {
+						border-color: transparent;
+					}
+				}
+			}
+		}
+		&:first-child {
+			> * {
+				span {
+					&::before {
+						border-color: transparent;
+					}
+				}
 			}
 		}
 	}

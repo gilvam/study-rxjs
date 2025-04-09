@@ -8,5 +8,3 @@ export enum MarbleDiagramTypeEnum {
 	SUBSCRIPTION = '^', // fazer regex
 	CANCEL = '!' // fazer regex
 }
-
-const GROUP_REGEX = new RegExp(/^\(.*\)$/);

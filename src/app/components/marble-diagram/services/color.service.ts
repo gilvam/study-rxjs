@@ -38,7 +38,10 @@ export class ColorService {
 		return this.colors[this.index++ % this.colors.length];
 	}
 
-	backGroundRadialDarken(color: string): string {
+	backGroundRadialDarken(color: string, isActive = true): string {
+		if (!isActive) {
+			return '';
+		}
 		const darken = ColorUtil.hexadecimalToHslDarken(color, 14);
 		const lighten = `rgb(from ${color} r g b / 1)`;
 		return `radial-gradient(circle, ${lighten} 0%, ${darken} 100%)`;

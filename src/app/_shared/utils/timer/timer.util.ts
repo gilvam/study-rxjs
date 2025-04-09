@@ -44,13 +44,13 @@ export class TimerUtil {
 
 		const bestUnit = unitScores.sort((a, b) => a.totalDigits - b.totalDigits)[0].unit;
 		const convertedValues = times.map((time) => unitConverters[bestUnit](TimerUtil.toMs(time)));
-		const minValue = Math.min(...convertedValues);
+		// const minValue = Math.min(...convertedValues);
 
 		let timeIndex = 0;
 		const result = input.replace(timeRegex, () => {
 			const original = convertedValues[timeIndex++];
-			const normalized = Math.round(original / minValue);
-			return `${normalized}${bestUnit}`;
+			// const normalized = minValue > 0 ? Math.round(original / minValue) : original;
+			return `${original}${bestUnit}`;
 		});
 
 		return result;
