@@ -1,5 +1,7 @@
+@use 'sass:color';
+
 $color-gray: #404040;
-$color-gray-light: lighten($color-gray, 30%);
+$color-gray-light: color.adjust($color-gray, $lightness: 30%);
 $border: 2px solid $color-gray;
 $container-height: 60px;
 $container-height-arrow: calc($container-height - 20px);
@@ -33,11 +35,18 @@ $container-height-arrow: calc($container-height - 20px);
 			@extend %itemInitAndFinalize;
 			@extend %arrow;
 
-			&--event {
+			&--event,
+			&--space,
+			&--complete,
+			&--complete-event,
+			&--error {
 				display: flex;
 				position: static;
 				justify-content: center;
 				align-items: center;
+			}
+
+			&--event {
 				padding: 10px;
 				width: 14px;
 				height: 14px;
@@ -59,8 +68,7 @@ $container-height-arrow: calc($container-height - 20px);
 			}
 
 			&--error {
-				display: flex;
-				justify-content: center;
+				align-items: flex-start;
 				color: red;
 				font-size: 40px;
 				font-weight: 100;
@@ -158,9 +166,6 @@ $container-height-arrow: calc($container-height - 20px);
 	%arrow {
 		> * {
 			span {
-				display: flex;
-				justify-content: center;
-
 				&::before,
 				&::after {
 					content: '';

@@ -1,6 +1,31 @@
 <h2>Marble Testing Visualizer</h2>
 
-<input type="text" [(ngModel)]="marbleInput" (input)="drawDiagram(marbleInput)" placeholder="Enter Marble Diagram" />
+<label>
+	oi
+	<input type="text" [(ngModel)]="marbleInput" (input)="drawDiagram(marbleInput)" placeholder="Enter Marble Diagram" />
+</label>
+
+<label>
+	Ativar Timer
+	<input type="checkbox" [(ngModel)]="isTimerEnabled" />
+</label>
+
+<!--<form>-->
+<!--	<label>-->
+<!--		oi-->
+<!--		<input-->
+<!--			type="text"-->
+<!--			[(ngModel)]="marbleInput"-->
+<!--			(input)="drawDiagram(marbleInput)"-->
+<!--			placeholder="Enter Marble Diagram"-->
+<!--		/>-->
+<!--	</label>-->
+
+<!--	<label>-->
+<!--		Ativar Timer-->
+<!--		<input type="checkbox" [(ngModel)]="isTimerEnabled" />-->
+<!--	</label>-->
+<!--</form>-->
 
 <div class="container">
 	@for (event of events(); track i; let i = $index) {

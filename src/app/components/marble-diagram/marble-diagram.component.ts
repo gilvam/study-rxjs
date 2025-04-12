@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, Inject, PLATFORM_ID, signal, WritableSignal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule } from '@angular/forms';
 import { isPlatformBrowser, NgClass } from '@angular/common';
 import { MarbleEvent } from './models/marble-event.model';
 import { MarbleEventTypeEnum } from './models/marble-event-type.enum';
@@ -14,23 +14,36 @@ import { TimerUtil } from '../../_shared/utils/timer/timer.util';
 	styleUrl: './marble-diagram.component.scss'
 })
 export class MarbleDiagramComponent implements AfterViewInit {
-	//TODO corrigir o (ab)c-(a-b)(sd 1s e)(f 5s gx|)
-	// TODO validar se entre 2 grupos deve ter 2 intervalos ou apenas 1: (ab)(cd)(d 1s e)(f 5s g|)
-
 	private defaultTime = 'ms';
 	events = signal<MarbleEvent[]>([]);
-	marbleInput = signal('12(ab)(d 1s e)(f 5s g|)');
 	timeType = signal(this.defaultTime);
+
+	marbleInput = signal('12-3(abc)(d-e)(fg 1000ms hi)(j 5s k)|');
+	isTimerEnabled = signal(true);
+
+	form = new FormGroup({
+		marbleInput: new FormControl('12-3(abc)(d-e)(fg 1000ms hi)(j 5s k)|'),
+		isTimerEnabled: new FormControl(true)
+	});
 
 	constructor(
 		@Inject(PLATFORM_ID) private platformId: object,
-		public colorService: ColorService
+		public colorService: ColorService,
+		private builder: FormBuilder
 	) {}
 
 	ngAfterViewInit(): void {
 		if (isPlatformBrowser(this.platformId)) {
+			this.buildForm();
 			this.drawDiagram(this.marbleInput);
 		}
+	}
+
+	buildForm(): void {
+		this.builder.group({
+			marbleInput: ['12-3(abc)(d-e)(fg 1000ms hi)(j 5s k)|'],
+			isTimerEnabled: [true]
+		});
 	}
 
 	getEventClass(type: MarbleEventTypeEnum): Record<string, boolean> {
@@ -55,6 +68,7 @@ export class MarbleDiagramComponent implements AfterViewInit {
 	drawDiagram(diagramList: WritableSignal<string>): void {
 		this.colorService.resetIndex();
 		const tokenNormalizedUnits = TimerUtil.normalizeTimeUnits(diagramList());
+
 		const tokens = this.tokenizeDiagram(tokenNormalizedUnits);
 		const events = this.createEventsFromTokens(tokens);
 		this.events.set(events);
@@ -86,13 +100,13 @@ export class MarbleDiagramComponent implements AfterViewInit {
 			const hasGroup = /^\(.*\)$/.test(token);
 			const hasFrame = token.includes(MarbleDiagramTypeEnum.FRAME);
 			const hasTime = /\d+(ms|s|m)/.test(token);
+			const hasGroupSpecial = hasGroup && (hasFrame || hasTime);
 
 			const handlers = [
 				{ condition: token === MarbleDiagramTypeEnum.FRAME, handler: () => this.handleSpaceEvent(acc) },
 				{ condition: token === MarbleDiagramTypeEnum.COMPLETE, handler: () => this.handleCompleteEvent(acc) },
 				{ condition: token === MarbleDiagramTypeEnum.ERROR, handler: () => this.handleErrorEvent(acc) },
-				{ condition: hasGroup && hasTime, handler: () => this.handleTimedGroupEvent(token, acc) },
-				{ condition: hasGroup && hasFrame, handler: () => this.handleComplexGroupEvent(token, acc) },
+				{ condition: hasGroupSpecial, handler: () => this.handleSpecialGroupEvent(token, acc) },
 				{ condition: hasGroup, handler: () => this.handleGroupEvent(token, acc) },
 				{ condition: hasTime, handler: () => this.handleTimedSpaceEvent(token, acc) },
 				{ condition: hasEvent, handler: () => this.handleCharacterEvent(token, acc, tokens) }
@@ -117,19 +131,13 @@ export class MarbleDiagramComponent implements AfterViewInit {
 		return token.replace('(', '-').replace(')', '-');
 	}
 
-	private handleComplexGroupEvent(token: string, acc: MarbleEvent[]): MarbleEvent[] {
-		const tokenList = this.replaceGroupToFrame(token).replaceAll(' ', '');
-		const tokenListFiltered = this.filterDiagramList(tokenList.split(''));
+	private handleSpecialGroupEvent(token: string, acc: MarbleEvent[]): MarbleEvent[] {
+		const tokenListTimeToFrame = token.replace(/(\d+)(ms|s|m)/g, (_, value: number) => '-'.repeat(Number(value)));
+		const tokenListWithoutSpace = tokenListTimeToFrame.replace(/\s+/g, '');
+		const tokenChanged = this.replaceGroupToFrame(tokenListWithoutSpace);
+		const tokenListFiltered = this.filterDiagramList(tokenChanged.split(''));
 		const tokenRegexList = tokenListFiltered.map((it) => this.generateRegExp(it));
-		return this.createEventsFromTokens(tokenRegexList, acc);
-	}
 
-	private handleTimedGroupEvent(token: string, acc: MarbleEvent[]): MarbleEvent[] {
-		const tokenFrameList = this.replaceGroupToFrame(token);
-		const tokenSpaceInSpecialCharacters = tokenFrameList.replace(/([|#-])/g, ' $1 ');
-		const tokenValidList = tokenSpaceInSpecialCharacters.split(' ').filter(Boolean);
-		const tokenListFiltered = this.filterDiagramList(tokenValidList);
-		const tokenRegexList = tokenListFiltered.map((it) => this.generateRegExp(it));
 		return this.createEventsFromTokens(tokenRegexList, acc);
 	}
 
