@@ -1,29 +1,33 @@
-<div>
+<div class="form-container">
 	<h1>Marble Diagrams</h1>
 
-	<form [formGroup]="form">
+	<form class="form" [formGroup]="form">
 		<ng-container formArrayName="marbleInputList">
 			@for (_ of form.controls.marbleInputList.controls; track $index; let isLast = $last) {
-				<input type="text" [formControlName]="$index" (input)="drawDiagram()" />
-				<button
-					class="btn btn--danger"
-					[class.btn--disabled]="!$index || !isLast"
-					(click)="btnDiagramRemove($index)"
-				>
-					-
-				</button>
+				<div class="form__input">
+					<input type="text" [formControlName]="$index" (input)="drawDiagram()" />
+					<button
+						class="btn btn--danger"
+						[class.btn--disabled]="!$index || !isLast"
+						(click)="btnDiagramRemove($index)"
+					>
+						-
+					</button>
+				</div>
 			}
 		</ng-container>
-		<label>
-			Enable timer
-			<input type="checkbox" formControlName="isTimerEnabled" />
-		</label>
-		<button class="btn btn--primary" (click)="btnDiagramNew()">+</button>
+		<div class="form__action">
+			<label>
+				Enable timer
+				<input type="checkbox" formControlName="isTimerEnabled" />
+			</label>
+			<button class="btn btn--primary btn--fab" (click)="btnDiagramNew()">+</button>
+		</div>
 	</form>
 </div>
 
 @for (eventList of eventMatrix(); track $index) {
-	<article class="container" [class.container--no-timer]="form.getRawValue().isTimerEnabled">
+	<article [class.no-timer]="form.getRawValue().isTimerEnabled">
 		@for (event of eventList; track i; let i = $index) {
 			<div class="item">
 				<div
