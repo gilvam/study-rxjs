@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MarbleDiagramComponent } from './marble-diagram.component';
-import { signal } from '@angular/core';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MarbleEventTypeEnum } from './models/marble-event-type.enum';
 
 describe('MarbleDiagramComponent', () => {
@@ -10,7 +10,8 @@ describe('MarbleDiagramComponent', () => {
 
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
-			imports: [MarbleDiagramComponent]
+			imports: [MarbleDiagramComponent],
+			providers: [FormsModule, ReactiveFormsModule]
 		}).compileComponents();
 
 		fixture = TestBed.createComponent(MarbleDiagramComponent);
@@ -24,123 +25,135 @@ describe('MarbleDiagramComponent', () => {
 	});
 
 	describe('drawDiagram', () => {
-		const testCases: { input: string; expected: string[]; expectedGroups?: string[][] }[] = [
+		const testCases: { inputs: string[]; expected: string[][]; expectedGroups?: string[][][] }[] = [
 			{
-				input: 'a------b',
-				expected: ['event', 'space', 'space', 'space', 'space', 'space', 'space', 'event']
+				inputs: ['a------b'],
+				expected: [['event', 'space', 'space', 'space', 'space', 'space', 'space', 'event']]
 			},
 			{
-				input: 'ab',
-				expected: ['event', 'event']
+				inputs: ['ab'],
+				expected: [['event', 'event']]
 			},
 			{
-				input: 'ab#',
-				expected: ['event', 'event', 'error']
+				inputs: ['ab#'],
+				expected: [['event', 'event', 'error']]
 			},
 			{
-				input: 'ab|',
-				expected: ['event', 'event-and-complete']
+				inputs: ['ab|'],
+				expected: [['event', 'event-and-complete']]
 			},
 			{
-				input: '(ab)|',
-				expected: ['space', 'group', 'space', 'complete'],
-				expectedGroups: [[], ['event', 'event'], [], []]
+				inputs: ['(ab)|'],
+				expected: [['space', 'group', 'space', 'complete']],
+				expectedGroups: [[[], ['event', 'event'], [], []]]
 			},
 			{
-				input: '(ab|)',
-				expected: ['space', 'group', 'complete'],
-				expectedGroups: [[], ['event', 'event'], []]
+				inputs: ['(ab|)'],
+				expected: [['space', 'group', 'complete']],
+				expectedGroups: [[[], ['event', 'event'], []]]
 			},
 			{
-				input: '(ab#)',
-				expected: ['space', 'group', 'error'],
-				expectedGroups: [[], ['event', 'event'], []]
+				inputs: ['(ab#)'],
+				expected: [['space', 'group', 'error']],
+				expectedGroups: [[[], ['event', 'event'], []]]
 			},
 			{
-				input: 'a(b-c)',
-				expected: ['event', 'space', 'event', 'space', 'event', 'space']
+				inputs: ['a(b-c)'],
+				expected: [['event', 'space', 'event', 'space', 'event', 'space']]
 			},
 			{
-				input: '(a-b|)',
-				expected: ['space', 'event', 'space', 'event-and-complete']
+				inputs: ['(a-b|)'],
+				expected: [['space', 'event', 'space', 'event-and-complete']]
 			},
 			{
-				input: '(a-b#)',
-				expected: ['space', 'event', 'space', 'event', 'error']
+				inputs: ['(a-b#)'],
+				expected: [['space', 'event', 'space', 'event', 'error']]
 			},
 			{
-				input: '(a 3ms b)',
-				expected: ['space', 'event', 'space', 'space', 'space', 'event', 'space']
+				inputs: ['(a 3ms b)'],
+				expected: [['space', 'event', 'space', 'space', 'space', 'event', 'space']]
 			},
 			{
-				input: '(k 3ms l|)',
-				expected: ['space', 'event', 'space', 'space', 'space', 'event-and-complete']
+				inputs: ['(k 3ms l|)'],
+				expected: [['space', 'event', 'space', 'space', 'space', 'event-and-complete']]
 			},
 			{
-				input: '(k 3ms l#)',
-				expected: ['space', 'event', 'space', 'space', 'space', 'event', 'error']
+				inputs: ['(k 3ms l#)'],
+				expected: [['space', 'event', 'space', 'space', 'space', 'event', 'error']]
 			},
 			{
-				input: '(g 1ms h-|)',
-				expected: ['space', 'event', 'space', 'event', 'space', 'complete']
+				inputs: ['(g 1ms h-|)'],
+				expected: [['space', 'event', 'space', 'event', 'space', 'complete']]
 			},
 			{
-				input: '-- 1ms a 1ms (c|)',
-				expected: ['space', 'space', 'space', 'event', 'space', 'space', 'group', 'complete'],
-				expectedGroups: [[], [], [], [], [], [], ['event'], []]
+				inputs: ['-- 1ms a 1ms (c|)'],
+				expected: [['space', 'space', 'space', 'event', 'space', 'space', 'group', 'complete']],
+				expectedGroups: [[[], [], [], [], [], [], ['event'], []]]
 			},
 			{
-				input: '2ms (a-b|)',
-				expected: ['space', 'space', 'space', 'event', 'space', 'event-and-complete']
+				inputs: ['2ms (a-b|)'],
+				expected: [['space', 'space', 'space', 'event', 'space', 'event-and-complete']]
 			},
 			{
-				input: '2ms (0-1|)',
-				expected: ['space', 'space', 'space', 'event', 'space', 'event-and-complete']
+				inputs: ['2ms (0-1|)'],
+				expected: [['space', 'space', 'space', 'event', 'space', 'event-and-complete']]
 			},
 			{
-				input: '2ms (0-1#)',
-				expected: ['space', 'space', 'space', 'event', 'space', 'event', 'error']
+				inputs: ['2ms (0-1#)'],
+				expected: [['space', 'space', 'space', 'event', 'space', 'event', 'error']]
 			},
 			{
-				input: '(g 3ms h)',
-				expected: ['space', 'event', 'space', 'space', 'space', 'event', 'space']
+				inputs: ['(g 3ms h)'],
+				expected: [['space', 'event', 'space', 'space', 'space', 'event', 'space']]
 			},
 			{
-				input: '(g 1000ms h)(i 1s j)(k 2s l)-|',
+				inputs: ['(a-b)', '12'],
 				expected: [
-					'space',
-					'event',
-					'space',
-					'event',
-					'space',
-					'space',
-					'event',
-					'space',
-					'event',
-					'space',
-					'space',
-					'event',
-					'space',
-					'space',
-					'event',
-					'space',
-					'space',
-					'complete'
+					['space', 'event', 'space', 'event', 'space'],
+					['event', 'event', 'space-fake', 'space-fake', 'space-fake']
+				]
+			},
+			{
+				inputs: ['(g 1000ms h)(i 1s j)(k 2s l)-|'],
+				expected: [
+					[
+						'space',
+						'event',
+						'space',
+						'event',
+						'space',
+						'space',
+						'event',
+						'space',
+						'event',
+						'space',
+						'space',
+						'event',
+						'space',
+						'space',
+						'event',
+						'space',
+						'space',
+						'complete'
+					]
 				]
 			}
 		];
 
 		testCases.forEach((testCase) => {
-			it(`should draw diagram with input ${testCase.input}`, () => {
-				component.marbleInput = signal(testCase.input);
+			it(`should draw diagram with input ${testCase.inputs}`, () => {
+				component.form.controls.marbleInputList.clear();
+				testCase.inputs.forEach((it) => component.form.controls.marbleInputList.push(new FormControl(it)));
 
-				component.drawDiagram(component.marbleInput);
+				component.drawDiagram();
 
-				const events = component.events();
-				const eventTypes = events.map((event) => event.type);
-				const eventGroups = events.map((it) => it.subEvents?.map((subEvent) => subEvent.type)).filter(Boolean);
+				const events = component.eventMatrix();
+				const eventTypes = events.map((list) => list.map((event) => event.type));
+				const eventGroups = events
+					.map((list) => list.map((it) => it.subEvents?.map((subEvent) => subEvent.type)))
+					.filter(Boolean);
 
-				if (eventTypes.includes(MarbleEventTypeEnum.GROUP)) {
+				if (eventTypes.flat().includes(MarbleEventTypeEnum.GROUP)) {
 					expect(eventGroups).toEqual(testCase.expectedGroups);
 				}
 				expect(eventTypes).toEqual(testCase.expected);
@@ -151,19 +164,19 @@ describe('MarbleDiagramComponent', () => {
 	it('should render element input a------b', () => {
 		const input = 'a------b';
 		const inputLetters = input.replace(/[^a-zA-Z]/g, '').split('');
-		const expected = ['event', 'space', 'space', 'space', 'space', 'space', 'space', 'event'];
-		component.marbleInput = signal(input);
+		const eventExpected = ['event', 'space', 'space', 'space', 'space', 'space', 'space', 'event'];
+		component.form.controls.marbleInputList.setValue([input]);
 
-		component.drawDiagram(component.marbleInput);
+		component.drawDiagram();
 		fixture.detectChanges();
-		const events = component.events();
+		const events = component.eventMatrix().at(0) || [];
 		const eventTypes = events.map((event) => event.type);
 		const compiled = fixture.nativeElement as HTMLElement;
 		const letters = Array.from(compiled.querySelectorAll('.item'))
 			.map((el) => el.textContent?.trim())
 			.filter(Boolean);
 
-		expect(eventTypes).toEqual(expected);
+		expect(eventTypes).toEqual(eventExpected);
 		expect(letters).toEqual(inputLetters);
 	});
 });

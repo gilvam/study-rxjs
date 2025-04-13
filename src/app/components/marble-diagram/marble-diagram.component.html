@@ -1,53 +1,55 @@
-<h2>Marble Testing Visualizer</h2>
+<div>
+	<h1>Marble Diagrams</h1>
 
-<label>
-	oi
-	<input type="text" [(ngModel)]="marbleInput" (input)="drawDiagram(marbleInput)" placeholder="Enter Marble Diagram" />
-</label>
-
-<label>
-	Ativar Timer
-	<input type="checkbox" [(ngModel)]="isTimerEnabled" />
-</label>
-
-<!--<form>-->
-<!--	<label>-->
-<!--		oi-->
-<!--		<input-->
-<!--			type="text"-->
-<!--			[(ngModel)]="marbleInput"-->
-<!--			(input)="drawDiagram(marbleInput)"-->
-<!--			placeholder="Enter Marble Diagram"-->
-<!--		/>-->
-<!--	</label>-->
-
-<!--	<label>-->
-<!--		Ativar Timer-->
-<!--		<input type="checkbox" [(ngModel)]="isTimerEnabled" />-->
-<!--	</label>-->
-<!--</form>-->
-
-<div class="container">
-	@for (event of events(); track i; let i = $index) {
-		<div class="item">
-			<div
-				[ngClass]="getEventClass(event.type)"
-				[style.background]="colorService.backGroundRadialDarken(event.color, isEvent(event.type))"
-				[attr.time-type]="i + timeType()"
-			>
-				@if (isEventGroup(event.type)) {
-					@for (subEvent of event.subEvents; track $index) {
-						<div
-							class="item--event"
-							[attr.time-type]="i + timeType()"
-							[style.background]="colorService.backGroundRadialDarken(subEvent.color)"
-						>
-							<span>{{ subEvent.label }}</span>
-						</div>
-					}
-				}
-				<span>{{ event.label }}</span>
-			</div>
-		</div>
-	}
+	<form [formGroup]="form">
+		<ng-container formArrayName="marbleInputList">
+			@for (_ of form.controls.marbleInputList.controls; track $index; let isLast = $last) {
+				<input type="text" [formControlName]="$index" (input)="drawDiagram()" />
+				<button
+					class="btn btn--danger"
+					[class.btn--disabled]="!$index || !isLast"
+					(click)="btnDiagramRemove($index)"
+				>
+					-
+				</button>
+			}
+		</ng-container>
+		<label>
+			Enable timer
+			<input type="checkbox" formControlName="isTimerEnabled" />
+		</label>
+		<button class="btn btn--primary" (click)="btnDiagramNew()">+</button>
+	</form>
 </div>
+
+@for (eventList of eventMatrix(); track $index) {
+	<article class="container" [class.container--no-timer]="form.getRawValue().isTimerEnabled">
+		@for (event of eventList; track i; let i = $index) {
+			<div class="item">
+				<div
+					[ngClass]="getEventClass(event.type)"
+					[style.background]="colorService.backGroundRadialDarken(event.color, isEvent(event.type))"
+					[attr.time-type]="i + timeType()"
+				>
+					@if (isEventGroup(event.type)) {
+						@for (subEvent of event.subEvents; track $index) {
+							<div
+								class="item--event"
+								[attr.time-type]="i + timeType()"
+								[style.background]="colorService.backGroundRadialDarken(subEvent.color)"
+							>
+								<span>{{ subEvent.label }}</span>
+							</div>
+						}
+					}
+					<span>{{ event.label }}</span>
+				</div>
+			</div>
+		}
+	</article>
+}
+
+<span>
+	This project was designed to make Marble Diagrams easier to understand. Please note that some rules may not fully
+	align with the official documentation.
+</span>

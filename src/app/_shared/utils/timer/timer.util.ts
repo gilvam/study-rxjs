@@ -12,10 +12,15 @@ export class TimerUtil {
 		return time.value * (conversionFactors[time.unit] || 1);
 	}
 
-	static normalizeTimeUnits(input: string): string {
+	static normalizeTimeUnits(inputs: string[] | string): string[] {
 		const timeRegex = /(\d+)(ms|s|m)/g;
-		const matches = Array.from(input.matchAll(timeRegex));
-		const times: TimesModel[] = matches.map((match) => new TimesModel(Number(match.at(1)), match.at(2)));
+		const inputArray = Array.isArray(inputs) ? inputs : [inputs];
+
+		const allTimes: TimesModel[] = inputArray.flatMap((input) => {
+			const matches = Array.from(input.matchAll(timeRegex));
+			return matches.map((match) => new TimesModel(Number(match.at(1)), match.at(2)));
+		});
+
 		const unitConverters: Record<string, (ms: number) => number> = {
 			ms: (ms: number) => ms,
 			s: (ms: number) => Math.floor(ms / 1000),
@@ -23,18 +28,18 @@ export class TimerUtil {
 		};
 
 		const validUnits = [TimeEnum.MS, TimeEnum.S, TimeEnum.M].filter((timer) => {
-			return times.every((time) => {
+			return allTimes.every((time) => {
 				const ms = TimerUtil.toMs(time);
 				return unitConverters[timer](ms) > 0;
 			});
 		});
 
-		if (times.length === 1) {
-			return input;
+		if (allTimes.length === 0 || validUnits.length === 0) {
+			return inputArray;
 		}
 
 		const unitScores = validUnits.map((unit) => {
-			const totalDigits = times.reduce((sum, time) => {
+			const totalDigits = allTimes.reduce((sum, time) => {
 				const ms = TimerUtil.toMs(time);
 				const converted = unitConverters[unit](ms);
 				return sum + String(converted).length;
@@ -43,16 +48,19 @@ export class TimerUtil {
 		});
 
 		const bestUnit = unitScores.sort((a, b) => a.totalDigits - b.totalDigits)[0].unit;
-		const convertedValues = times.map((time) => unitConverters[bestUnit](TimerUtil.toMs(time)));
-		// const minValue = Math.min(...convertedValues);
 
-		let timeIndex = 0;
-		const result = input.replace(timeRegex, () => {
-			const original = convertedValues[timeIndex++];
-			// const normalized = minValue > 0 ? Math.round(original / minValue) : original;
-			return `${original}${bestUnit}`;
+		return inputArray.map((input) => {
+			let timeIndex = 0;
+			const matches = Array.from(input.matchAll(timeRegex));
+			const convertedValues = matches.map((match) => {
+				const time = new TimesModel(Number(match.at(1)), match.at(2));
+				return unitConverters[bestUnit](TimerUtil.toMs(time));
+			});
+
+			return input.replace(timeRegex, () => {
+				const original = convertedValues[timeIndex++];
+				return `${original}${bestUnit}`;
+			});
 		});
-
-		return result;
 	}
 }

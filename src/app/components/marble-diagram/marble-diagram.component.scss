@@ -5,16 +5,100 @@ $color-gray-light: color.adjust($color-gray, $lightness: 30%);
 $border: 2px solid $color-gray;
 $container-height: 60px;
 $container-height-arrow: calc($container-height - 20px);
+$action-gap: 16px;
 
 :host {
 	font-family: Arial, sans-serif;
 	display: flex;
 	flex-direction: column;
 
-	input {
-		padding: 8px;
-		margin-bottom: 10px;
-		font-size: 16px;
+	.btn {
+		width: 28px;
+		height: 28px;
+		font-size: 14px;
+		font-weight: 400;
+		white-space: nowrap;
+		border: 1px solid transparent;
+		border-radius: 4px;
+
+		&--primary {
+			color: #fff;
+			background-color: #337ab7;
+			border-color: #2e6da4;
+			border-radius: 50%;
+			width: 50px;
+			height: 50px;
+			position: absolute;
+			bottom: -25px;
+			left: 50px;
+
+			&:active,
+			&:hover {
+				background-color: #286090;
+				border-color: #204d74;
+			}
+		}
+
+		&--danger {
+			color: #fff;
+			background-color: #d9534f;
+			border-color: #d43f3a;
+			position: absolute;
+			right: -50px;
+			bottom: 68px;
+
+			&:active,
+			&:hover {
+				background-color: #c9302c;
+				border-color: #ac2925;
+			}
+
+			&.btn--disabled {
+				display: none;
+				visibility: hidden;
+			}
+		}
+	}
+
+	> div {
+		background: #e4e8e9;
+
+		h1 {
+			margin: 0;
+			padding: 16px 16px 0;
+			font-size: 24px;
+		}
+
+		form {
+			padding: 16px;
+			font-size: 12px;
+
+			display: flex;
+			flex-direction: column;
+			align-items: flex-end;
+			flex-wrap: wrap;
+			position: relative;
+			width: min(500px, 100%);
+
+			> input {
+				padding: 12px;
+				width: 100%;
+				margin-bottom: 16px;
+			}
+
+			label {
+				display: flex;
+				flex-direction: row;
+				align-items: stretch;
+				justify-content: space-evenly;
+				padding: 8px 0 8px 8px;
+				user-select: none;
+
+				input {
+					margin: 0 0 0 8px;
+				}
+			}
+		}
 	}
 
 	.container {
@@ -22,6 +106,14 @@ $container-height-arrow: calc($container-height - 20px);
 		position: relative;
 		width: 100%;
 		padding-top: $container-height;
+		margin-top: 40px;
+
+		&.container--no-timer {
+			.item {
+				@extend %timeLine;
+				@extend %timeLineNumbers;
+			}
+		}
 
 		.item {
 			display: flex;
@@ -30,10 +122,8 @@ $container-height-arrow: calc($container-height - 20px);
 			width: 100%;
 			z-index: 2;
 
-			@extend %timeLine;
-			@extend %timeLineNumbers;
-			@extend %itemInitAndFinalize;
 			@extend %arrow;
+			@extend %itemInitAndFinalize;
 
 			&--event,
 			&--space,
@@ -85,6 +175,30 @@ $container-height-arrow: calc($container-height - 20px);
 						margin-top: -5px;
 					}
 				}
+			}
+		}
+	}
+
+	> span {
+		position: absolute;
+		bottom: 100px;
+		margin: 0 auto;
+		width: 100%;
+		color: #aaa;
+		text-align: center;
+		font-size: 14px;
+		white-space: pre-line;
+		animation: fadeOut 30s forwards;
+
+		@keyframes fadeOut {
+			0% {
+				opacity: 1;
+			}
+			80% {
+				opacity: 1;
+			}
+			100% {
+				opacity: 0;
 			}
 		}
 	}
