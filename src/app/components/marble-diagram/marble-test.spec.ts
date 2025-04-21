@@ -1,6 +1,6 @@
 import { TestScheduler } from 'rxjs/internal/testing/TestScheduler';
+import { combineLatest, delay, map, merge, Observable, of, skip, startWith, Subject } from 'rxjs';
 // import { concat, concatMap, delay, Observable, of } from 'rxjs';
-import { combineLatest, delay, map, merge, Observable, skip, startWith, Subject } from 'rxjs';
 
 describe('Marble Testing', () => {
 	let testScheduler: TestScheduler;
@@ -11,59 +11,66 @@ describe('Marble Testing', () => {
 		});
 	});
 
-	// it('test', () => {
-	// 	testScheduler.run((helpers) => {
-	// 		const { cold, expectObservable } = helpers;
-	// 		const source$ = cold('-a-b-c|');
-	// 		const expected = '-a-b-c|';
-	//
-	// 		expectObservable(source$).toBe(expected);
-	// 	});
-	// });
-	// it('test with values', () => {
-	// 	testScheduler.run((helpers) => {
-	// 		const { cold, expectObservable } = helpers;
-	// 		const source$ = cold('-a-b-c|', { a: 1, b: 2, c: 3 });
-	// 		const expected = '-a-b-c|';
-	//
-	// 		expectObservable(source$).toBe(expected, { a: 1, b: 2, c: 3 });
-	// 	});
-	// });
-	// it('test', () => {
-	// 	testScheduler.run((helpers) => {
-	// 		const { cold, expectObservable } = helpers;
-	// 		const source$ = cold('-a-b-c|');
-	// 		const final$ = source$.pipe(concatMap((val) => of(val).pipe(delay(100))));
-	// 		const expected = '- 100ms a 99ms b 99ms (c|)';
-	// 		expectObservable(final$).toBe(expected);
-	// 	});
-	// });
-	//
-	// it('test', () => {
-	// 	testScheduler.run((helpers) => {
-	// 		const { hot, expectObservable } = helpers;
-	// 		const source$ = hot('-a-b-^-c|');
-	// 		const expected = '--c|';
-	// 		expectObservable(source$).toBe(expected);
-	// 	});
-	// });
-	//
-	// it('test subscriptions', () => {
-	// 	testScheduler.run((helpers) => {
-	// 		const { cold, expectObservable, expectSubscriptions } = helpers;
-	// 		const source1$ = cold('-a-b-c|');
-	// 		const source2$ = cold('-d-e-f|');
-	// 		const final$ = concat(source1$, source2$);
-	//
-	// 		const expected = '-a-b-c-d-e-f|';
-	// 		const expectedSubscriptionsSource1 = '^-----!';
-	// 		const expectedSubscriptionsSource2 = '------^-----!';
-	//
-	// 		expectObservable(final$).toBe(expected);
-	// 		expectSubscriptions(source1$.subscriptions).toBe(expectedSubscriptionsSource1);
-	// 		expectSubscriptions(source2$.subscriptions).toBe(expectedSubscriptionsSource2);
-	// 	});
-	// });
+	describe('00', () => {
+		it('should understand marble diagram', () => {
+			testScheduler.run(({ cold, expectObservable }) => {
+				const source = cold('--');
+				const expected = '--';
+
+				expectObservable(source).toBe(expected);
+			});
+		});
+
+		it('should support basic values provided as params (number)', () => {
+			testScheduler.run(({ cold, expectObservable }) => {
+				const source = cold('-a-|', { a: 0 });
+				const expected = '-a-|';
+
+				expectObservable(source).toBe(expected, { a: 0 });
+			});
+		});
+
+		it('should support custom erros', () => {
+			testScheduler.run(({ cold, expectObservable }) => {
+				const source = cold('--#', undefined, new Error('Oops!'));
+				const expected = '--#';
+
+				expectObservable(source).toBe(expected, undefined, new Error('Oops!'));
+			});
+		});
+
+		it('should support multiple emission in the same time frame', () => {
+			testScheduler.run(({ expectObservable }) => {
+				const source = of(1, 2, 3);
+
+				expectObservable(source).toBe('(abc|)', { a: 1, b: 2, c: 3 });
+			});
+		});
+
+		it('should support testing subscriptions', () => {
+			testScheduler.run(({ hot, expectObservable, expectSubscriptions }) => {
+				const source = hot('-a-^b---c-|', { a: 1, b: 2, c: 3, d: 4 });
+				const subscription = '   ^------!';
+				const expectedMarbles = '-b---c-|';
+				const expectedValues = { a: 1, b: 2, c: 3 };
+
+				expectObservable(source).toBe(expectedMarbles, expectedValues);
+				expectSubscriptions(source.subscriptions).toBe(subscription);
+			});
+		});
+
+		it('should multiply by "2" each value emitted', () => {
+			testScheduler.run(({ cold, expectObservable }) => {
+				const source = cold('a-b-c-|', { a: 1, b: 2, c: 3 });
+				const expectedMarbles = 'a-b-c-|';
+				const expectedValues = { a: 2, b: 4, c: 6 };
+
+				const result = source.pipe(map((it) => it * 2));
+
+				expectObservable(result).toBe(expectedMarbles, expectedValues);
+			});
+		});
+	});
 
 	describe('01', () => {
 		function lightBulb(switch1$: Observable<boolean>): Observable<boolean> {
@@ -238,7 +245,7 @@ describe('marble test group emissions', () => {
 	});
 
 	it('deve emitir valores como (abc)(d-e)(f 10ms g)', () => {
-		scheduler.run(({ cold, expectObservable, time }) => {
+		scheduler.run(({ cold, expectObservable }) => {
 			const group1 = cold('(abc)', { a: 'a', b: 'b', c: 'c' });
 			const group2 = cold('(d-e)', { d: 'd', e: 'e' }).pipe(delay(5, scheduler));
 			const group3 = cold('(f 10ms g)', { f: 'f', g: 'g' }).pipe(delay(10, scheduler));
