@@ -32,7 +32,7 @@
 			<div class="item">
 				<div
 					[ngClass]="getEventClass(event.type)"
-					[style.background]="colorService.backGroundRadialDarken(event.color, isEvent(event.type))"
+					[style.background]="color.backGroundRadialDarken(event.color, isEvent(event.type))"
 					[attr.time-type]="i + timeType()"
 				>
 					@if (isEventGroup(event.type)) {
@@ -40,7 +40,7 @@
 							<div
 								class="item--event"
 								[attr.time-type]="i + timeType()"
-								[style.background]="colorService.backGroundRadialDarken(subEvent.color)"
+								[style.background]="color.backGroundRadialDarken(subEvent.color)"
 							>
 								<span>{{ subEvent.label }}</span>
 							</div>

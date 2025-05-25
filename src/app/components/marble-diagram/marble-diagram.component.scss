@@ -3,7 +3,7 @@
 $color-gray: #404040;
 $color-gray-light: color.adjust($color-gray, $lightness: 30%);
 $border: 2px solid $color-gray;
-$container-height-arrow: 40px;
+$container-height-line: 40px;
 $action-gap: 16px;
 $btn-dimension: 28px;
 
@@ -84,6 +84,7 @@ $btn-dimension: 28px;
 					padding: 12px;
 					flex: 1;
 				}
+
 				button {
 				}
 			}
@@ -142,13 +143,13 @@ $btn-dimension: 28px;
 			width: 100%;
 			z-index: 2;
 
-			@extend %arrow;
+			@extend %line;
 			@extend %itemInitAndFinalize;
 
 			&--event,
 			&--space,
 			&--complete,
-			&--complete-event,
+			&--complete-group,
 			&--error {
 				display: flex;
 				position: static;
@@ -169,12 +170,6 @@ $btn-dimension: 28px;
 				display: flex;
 				height: 10px;
 				justify-content: center;
-			}
-
-			&--complete {
-			}
-
-			&--complete-event {
 			}
 
 			&--error {
@@ -235,7 +230,7 @@ $btn-dimension: 28px;
 		&::after {
 			content: '';
 			position: absolute;
-			top: calc(-#{$container-height-arrow} + 10px);
+			top: calc(-#{$container-height-line} + 10px);
 			border-top: 1px solid $color-gray-light;
 			height: 5px;
 		}
@@ -256,6 +251,7 @@ $btn-dimension: 28px;
 				border-color: transparent;
 			}
 		}
+
 		&:last-child {
 			&::after {
 				border-top: none;
@@ -264,8 +260,9 @@ $btn-dimension: 28px;
 	}
 
 	%itemInitAndFinalize {
-		&:first-child {
-			> * {
+		&:first-child,
+		&:last-child {
+			> *:not(.item--space, .item--error, .item--complete-group, .item--complete) {
 				&::before {
 					content: '';
 					position: absolute;
@@ -276,17 +273,16 @@ $btn-dimension: 28px;
 				}
 			}
 		}
-		&:last-child {
-			> .item--complete-event,
-			> .item--complete {
-				&::before {
-					content: '';
-					position: absolute;
-					border-left: $border;
-					height: 48px;
-					top: -6px;
-					z-index: -1;
-				}
+
+		> .item--complete-group,
+		> .item--complete {
+			&::before {
+				content: '';
+				position: absolute;
+				border-left: 2px solid #404040;
+				height: calc(100% + 12px);
+				top: -6px;
+				z-index: -1;
 			}
 		}
 	}
@@ -299,12 +295,12 @@ $btn-dimension: 28px;
 				font-size: 10px;
 				font-weight: 100;
 				color: $color-gray-light;
-				top: calc(-#{$container-height-arrow} + 17px);
+				top: calc(-#{$container-height-line} + 17px);
 			}
 		}
 	}
 
-	%arrow {
+	%line {
 		> * {
 			span {
 				&::before,
@@ -328,6 +324,7 @@ $btn-dimension: 28px;
 				}
 			}
 		}
+
 		&:last-child {
 			> * {
 				span {
@@ -337,6 +334,7 @@ $btn-dimension: 28px;
 				}
 			}
 		}
+
 		&:first-child {
 			> * {
 				span {

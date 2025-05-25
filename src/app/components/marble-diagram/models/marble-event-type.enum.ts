@@ -1,9 +1,9 @@
 export enum MarbleEventTypeEnum {
 	EVENT = 'event',
-	COMPLETE = 'complete',
-	EVENT_AND_COMPLETE = 'event-and-complete',
-	ERROR = 'error',
 	GROUP = 'group',
+	GROUP_AND_COMPLETE = 'group-and-complete',
+	COMPLETE = 'complete',
+	ERROR = 'error',
 	SPACE = 'space',
 	SPACE_FAKE = 'space-fake'
 }
