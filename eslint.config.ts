@@ -2,18 +2,26 @@ import eslint from '@eslint/js';
 import * as tsEslint from 'typescript-eslint';
 import * as angular from 'angular-eslint';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import prettierPlugin from 'eslint-plugin-prettier';
 
-export default tsEslint.config(
+export default [
+	eslint.configs.recommended,
+	...tsEslint.configs.recommended,
+	...tsEslint.configs.recommendedTypeChecked.map((config) => ({
+		...config,
+		languageOptions: {
+			...config.languageOptions,
+			parserOptions: {
+				...(config.languageOptions?.parserOptions || {}),
+				project: ['./tsconfig.json']
+			}
+		}
+	})),
+	...tsEslint.configs.stylistic,
+	...angular.configs.tsRecommended,
 	{
-		extends: [
-			eslint.configs.recommended,
-			...tsEslint.configs.recommended,
-			...tsEslint.configs.stylistic,
-			...angular.configs.tsRecommended,
-			eslintPluginPrettierRecommended
-		],
 		files: ['**/*.ts'],
+		plugins: { prettier: prettierPlugin },
 		processor: angular.processInlineTemplates,
 		rules: {
 			// typescript rules
@@ -26,6 +34,7 @@ export default tsEslint.config(
 			'@typescript-eslint/no-empty-interface': 'error',
 			'@typescript-eslint/no-empty-function': 'error',
 			'@typescript-eslint/explicit-module-boundary-types': 'error',
+			'@typescript-eslint/prefer-readonly': 'error',
 
 			// angular rules
 			'@angular-eslint/directive-selector': ['error', { type: 'attribute', prefix: 'app', style: 'camelCase' }],
@@ -45,4 +54,4 @@ export default tsEslint.config(
 		extends: [...angular.configs.templateRecommended, ...angular.configs.templateAccessibility],
 		rules: {}
 	}
-);
+];

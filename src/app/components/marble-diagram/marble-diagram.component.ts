@@ -19,9 +19,10 @@ export class MarbleDiagramComponent implements AfterViewInit {
 	// private marbleList = ['a(bc|)', 'a(b|)', 'a|', 'ab', '--'];
 	// private marbleList = ['a(bcd|)', 'a(bc|)', 'a(b|)', 'a|'];
 	// private marbleList = ['-a-b|', '-c-d-e-f|'];
-	private marbleList = ['abcd(ef)---(a|)'];
-	private defaultTime = 'ms';
-	private maxRepeat = 100;
+	private readonly marbleList = ['abcd(ef)---(a|)'];
+	private readonly defaultTime = 'ms';
+	private readonly maxRepeat = 100;
+
 	eventMatrix = signal<MarbleEvent[][]>([]);
 	timeType = signal(this.defaultTime);
 
@@ -34,7 +35,7 @@ export class MarbleDiagramComponent implements AfterViewInit {
 	});
 
 	constructor(
-		@Inject(PLATFORM_ID) private platformId: object,
+		@Inject(PLATFORM_ID) private readonly platformId: object,
 		public color: ColorService
 	) {}
 
