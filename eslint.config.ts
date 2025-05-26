@@ -25,8 +25,9 @@ export default [
 		processor: angular.processInlineTemplates,
 		rules: {
 			// typescript rules
-			'@typescript-eslint/comma-dangle': 'off',
-			'@typescript-eslint/lines-between-class-members': 'off',
+			// '@typescript-eslint/comma-dangle': 'off',
+			// '@typescript-eslint/lines-between-class-members': 'off',
+			'@typescript-eslint/no-unsafe-enum-comparison': 'off',
 			'@typescript-eslint/no-shadow': 'error',
 			'@typescript-eslint/no-explicit-any': 'error',
 			'@typescript-eslint/no-unused-vars': 'error',

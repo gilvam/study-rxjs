@@ -24,6 +24,10 @@ export class MarbleDiagramComponent implements AfterViewInit {
 
 	eventMatrix = signal<MarbleEvent[][]>([]);
 	timeType = signal(this.defaultTime);
+
+	// TODO: a linha depois do | no 'a-b|' deve ser cinza: // private marbleList = ['-a-b|', '-c-d-e-f|'];
+	// TODO: arrumar css para  'abcd(ef)---(a|)'
+
 	form = new FormGroup({
 		marbleInputList: new FormArray(this.marbleList.map((it) => new FormControl<string>(it))),
 		isTimerEnabled: new FormControl(true)

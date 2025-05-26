@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MarbleEvent } from '../models/marble-event.model';
-import { EnumUtil } from '../../../_shared/utils/enum.util';
 import { MarbleDiagramTypeEnum } from '../models/marble-diagram-type.enum';
 import { MarbleEventTypeEnum } from '../models/marble-event-type.enum';
 import { ColorService } from './color.service';
@@ -30,9 +29,9 @@ export class MarbleEventService {
 			const hasEvent = /[a-z0-9]/i.test(token);
 			const hasGroup = /^\(.*\)$/.test(token);
 			const hasTime = /\d+(ms|s|m)/.test(token);
-			const isFrame = EnumUtil.isEqual(token, MarbleDiagramTypeEnum.FRAME);
-			const isComplete = EnumUtil.isEqual(token, MarbleDiagramTypeEnum.COMPLETE);
-			const isError = EnumUtil.isEqual(token, MarbleDiagramTypeEnum.ERROR);
+			const isFrame = token === MarbleDiagramTypeEnum.FRAME;
+			const isComplete = token === MarbleDiagramTypeEnum.COMPLETE;
+			const isError = token === MarbleDiagramTypeEnum.ERROR;
 
 			const handlers = [
 				{ condition: isFrame, handler: () => this.handleSpaceEvent(acc) },
@@ -109,15 +108,14 @@ export class MarbleEventService {
 
 	private getGroupEvent(token: string): MarbleEvent[] {
 		const tokenListFiltered = this.filterDiagramList(this.replaceGroupToFrame(token.replaceAll(' ', '')).split(''));
-		const hasComplete = tokenListFiltered.some((it) => EnumUtil.isEqual(it, MarbleDiagramTypeEnum.COMPLETE));
+		const hasComplete = tokenListFiltered.some((it) => it === MarbleDiagramTypeEnum.COMPLETE);
 		const noSpecialChars = tokenListFiltered.filter((it) => !['|', '#'].includes(it));
 		const marbleEvent = hasComplete ? MarbleEventTypeEnum.GROUP_AND_COMPLETE : MarbleEventTypeEnum.GROUP;
-
 		const subEvents = noSpecialChars.map((char) => new MarbleEvent(char, this.color.backGround, MarbleEventTypeEnum.EVENT));
 
 		return [
 			new MarbleEvent('', '', marbleEvent, subEvents),
-			...(EnumUtil.isEqual(tokenListFiltered.at(-1), MarbleDiagramTypeEnum.FRAME) ? this.getSpaceEvent() : [])
+			...(tokenListFiltered.at(-1) === MarbleDiagramTypeEnum.FRAME ? this.getSpaceEvent() : [])
 		];
 	}
 
